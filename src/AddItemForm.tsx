@@ -4,11 +4,11 @@ import {IconButton} from "@mui/material";
 import {AddBox} from "@mui/icons-material";
 
 
-type AddItemFormPropsType = {
+export type AddItemFormPropsType = {
     addItem: (title: string) => void
 }
 
-export const AddItemForm = React.memo( (props: AddItemFormPropsType) => {
+export const AddItemForm = React.memo((props: AddItemFormPropsType) => {
 
     let [title, setTitle] = useState("")
     let [error, setError] = useState<string | null>(null)
@@ -40,12 +40,12 @@ export const AddItemForm = React.memo( (props: AddItemFormPropsType) => {
                    error={!!error}
                    value={title}
                    onChange={onChangeHandler}
-                   onKeyPress={onKeyPressHandler}
+                   onKeyDown={onKeyPressHandler}
                    label="Title"
                    helperText={error}
         />
         <IconButton color="primary" onClick={addItem}>
-            <AddBox />
+            <AddBox/>
         </IconButton>
     </div>
-} );
+});
