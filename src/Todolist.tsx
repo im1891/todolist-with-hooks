@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react'
-import {FilterValuesType} from './App'
-import {AddItemForm} from './AddItemForm'
+import {FilterValuesType} from './App/App'
+import {AddItemForm} from './AddItemForm/AddItemForm'
 import {EditableSpan} from './EditableSpan'
 
 import {Task} from './Task'
@@ -48,10 +48,10 @@ export const Todolist = React.memo(function (props: PropsType) {
     let tasksForTodolist = props.tasks
 
     if (props.filter === 'active') {
-        tasksForTodolist = props.tasks.filter(t => t.isDone === false)
+        tasksForTodolist = props.tasks.filter(t => !t.isDone)
     }
     if (props.filter === 'completed') {
-        tasksForTodolist = props.tasks.filter(t => t.isDone === true)
+        tasksForTodolist = props.tasks.filter(t => t.isDone)
     }
 
     return <div>
