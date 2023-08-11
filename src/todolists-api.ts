@@ -1,5 +1,78 @@
 import axios, { AxiosResponse } from 'axios'
 
+const instance = axios.create({
+	baseURL: 'https://social-network.samuraijs.com/api/1.1/',
+	withCredentials: true,
+	headers: {
+		['API-KEY']: 'fabd923c-84e3-4fc6-9742-c9c4e25be34f'
+	}
+})
+
+export const todolistsAPI = {
+	getTodolists() {
+		return instance
+			.get<TodolistType[]>('todo-lists')
+			.then((res: AxiosResponse<TodolistType[]>) => res.data)
+	},
+
+	createTodolist(title: string) {
+		return instance
+			.post<
+				ResponseType<{
+					item: TodolistType
+				}>
+			>('todo-lists', { title })
+			.then(
+				(res: AxiosResponse<ResponseType<{ item: TodolistType }>>) => res.data
+			)
+	},
+
+	deleteTodolist(todolistId: string) {
+		return instance
+			.delete<ResponseType>(`todo-lists/${todolistId}`)
+			.then((res: AxiosResponse<ResponseType>) => res.data)
+	},
+
+	updateTodolist(todolistId: string, title: string) {
+		return instance
+			.put<ResponseType>(`todo-lists/${todolistId}`, { title })
+			.then((res: AxiosResponse<ResponseType>) => res.data)
+	},
+
+	getTasks(todolistId: string) {
+		return instance
+			.get<GetTasksType>(`todo-lists/${todolistId}/tasks`)
+			.then((res: AxiosResponse<GetTasksType>) => {
+				return res.data.items
+			})
+	},
+
+	deleteTask(todolistId: string, taskId: string) {
+		return instance
+			.delete<ResponseType>(`todo-lists/${todolistId}/tasks/${taskId}`)
+			.then((res: AxiosResponse<ResponseType>) => res.data)
+	},
+
+	createTask(todolistId: string, title: string) {
+		return instance
+			.post<ResponseType<{ item: TaskType }>>(
+				`/todo-lists/${todolistId}/tasks`,
+				{ title }
+			)
+			.then((res: AxiosResponse<ResponseType<{ item: TaskType }>>) => res.data)
+	},
+
+	updateTask(todolistId: string, taskId: string, task: TaskUpdateType) {
+		return instance
+			.put<ResponseType<{ item: TaskType }>>(
+				`/todo-lists/${todolistId}/tasks/${taskId}`,
+				task
+			)
+			.then((res: AxiosResponse<ResponseType<{ item: TaskType }>>) => res.data)
+	}
+}
+
+///// types
 export type TodolistType = {
 	id: string
 	addedDate: string
@@ -47,88 +120,11 @@ type GetTasksType = {
 	error: string | null
 }
 
-export type UpdateTaskType = {
+export type TaskUpdateType = {
 	title: string
 	description: string
 	status: TaskStatuses
-	priority: number
+	priority: TaskPriorities
 	startDate: string
 	deadline: string
-}
-const instance = axios.create({
-	baseURL: 'https://social-network.samuraijs.com/api/1.1/',
-	withCredentials: true,
-	headers: {
-		['API-KEY']: 'fabd923c-84e3-4fc6-9742-c9c4e25be34f'
-	}
-})
-
-export const todolistsAPI = {
-	getTodolists() {
-		return instance
-			.get<TodolistType[]>('todo-lists')
-			.then((res: AxiosResponse<TodolistType[]>) => res.data)
-	},
-
-	createTodolist(title: string) {
-		return instance
-			.post<
-				ResponseType<{
-					item: TodolistType
-				}>
-			>('todo-lists', { title })
-			.then(
-				(res: AxiosResponse<ResponseType<{ item: TodolistType }>>) => res.data
-			)
-	},
-
-	deleteTodolist(id: string) {
-		return instance
-			.delete<ResponseType>(`todo-lists/${id}`)
-			.then((res: AxiosResponse) => res.data)
-	},
-
-	updateTodolist(id: string, title: string) {
-		return instance
-			.put<ResponseType>(`todo-lists/${id}`, { title })
-			.then((res: AxiosResponse<ResponseType>) => res.data)
-	},
-
-	getTasks(todolistId: string) {
-		return instance
-			.get<GetTasksType>(`todo-lists/${todolistId}/tasks`)
-			.then((res: AxiosResponse<GetTasksType>) => {
-				return res.data.items
-			})
-	},
-
-	deleteTask(todolistId: string, taskId: string) {
-		return instance
-			.delete<ResponseType>(`todo-lists/${todolistId}/tasks/${taskId}`)
-			.then((res: AxiosResponse<ResponseType>) => res.data)
-	},
-
-	createTask(todolistId: string, title: string) {
-		return instance
-			.post<ResponseType<{ item: TaskType }>>(
-				`/todo-lists/${todolistId}/tasks`,
-				{ title }
-			)
-			.then(
-				(res: AxiosResponse<ResponseType<{ item: TaskType }>>) =>
-					res.data.data.item
-			)
-	},
-
-	updateTask(todolistId: string, taskId: string, task: UpdateTaskType) {
-		return instance
-			.put<ResponseType<{ item: TaskType }>>(
-				`/todo-lists/${todolistId}/tasks/${taskId}`,
-				task
-			)
-			.then(
-				(res: AxiosResponse<ResponseType<{ item: TaskType }>>) =>
-					res.data.data.item
-			)
-	}
 }

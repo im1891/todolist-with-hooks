@@ -3,8 +3,8 @@ import { Meta } from '@storybook/react'
 import {
 	TaskPriorities,
 	TaskStatuses,
-	todolistsAPI,
-	UpdateTaskType
+	TaskUpdateType,
+	todolistsAPI
 } from '../todolists-api'
 
 const meta: Meta = {
@@ -50,7 +50,7 @@ const CreateTodolist = () => {
 }
 
 const DeleteTodolist = () => {
-	const [state, setState] = useState(null)
+	const [state, setState] = useState<any>(null)
 	const [todolistId, setTodolistId] = useState('')
 
 	const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -244,7 +244,7 @@ const UpdateTask = () => {
 	}
 
 	const onClikHandler = () => {
-		let task: UpdateTaskType = {
+		let task: TaskUpdateType = {
 			title: taskTitle,
 			description: '',
 			status: TaskStatuses.New,
