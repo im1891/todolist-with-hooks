@@ -4,13 +4,13 @@ import './index.css'
 import * as serviceWorker from './serviceWorker'
 import { store } from './App/store'
 import { Provider } from 'react-redux'
-import AppWithReducers from './trash/AppWithReducers'
+import App from './App/App'
 
 const container = document.getElementById('root') as HTMLElement
 const root = createRoot(container)
 root.render(
 	<Provider store={store}>
-		<AppWithReducers />
+		<App />
 	</Provider>
 )
 
