@@ -1,14 +1,18 @@
 import { Provider } from 'react-redux'
 import { AppRootStateType } from '../App/store'
-import { combineReducers, legacy_createStore as createStore } from 'redux'
+import { applyMiddleware, combineReducers, legacy_createStore as createStore } from 'redux'
 import { todolistsReducer } from '../features/TodolistsList/todolists-reducer'
 import { tasksReducer } from '../features/TodolistsList/tasks-reducer'
 import { v1 } from 'uuid'
 import { TaskPriorities, TaskStatuses } from '../todolists-api'
+import { appReducer, RequestStatusType } from '../App/app-reducer'
+import thunk from 'redux-thunk'
+import { composeWithDevTools } from 'redux-devtools-extension'
 
 const rootReducer = combineReducers({
 	todolists: todolistsReducer,
-	tasks: tasksReducer
+	tasks: tasksReducer,
+	app: appReducer
 })
 
 const initialGlobalState: AppRootStateType = {
@@ -18,19 +22,21 @@ const initialGlobalState: AppRootStateType = {
 			title: 'What to learn',
 			filter: 'all',
 			addedDate: '',
-			order: 0
+			order: 0,
+			entityStatus: RequestStatusType.IDLE
 		},
 		{
 			id: 'todolistId2',
 			title: 'What to buy',
 			filter: 'all',
 			addedDate: '',
-			order: 0
+			order: 0,
+			entityStatus: RequestStatusType.LOADING
 		}
 	],
 
 	tasks: {
-		['todolistId1']: [
+		'todolistId1': [
 			{
 				id: v1(),
 				title: 'HTML&CSS',
@@ -56,7 +62,7 @@ const initialGlobalState: AppRootStateType = {
 				priority: TaskPriorities.Low
 			}
 		],
-		['todolistId2']: [
+		'todolistId2': [
 			{
 				id: v1(),
 				title: 'Milk',
@@ -82,12 +88,15 @@ const initialGlobalState: AppRootStateType = {
 				priority: TaskPriorities.Low
 			}
 		]
+	},
+	app: {
+		status: RequestStatusType.IDLE,
+		error: null
 	}
 }
 
 const storyBookStore = createStore(
-	rootReducer,
-	initialGlobalState as AppRootStateType
+	rootReducer, initialGlobalState as AppRootStateType, composeWithDevTools(applyMiddleware(thunk))
 )
 export const ReduxStoreProviderDecorator = (Story: () => JSX.Element) => {
 	return (

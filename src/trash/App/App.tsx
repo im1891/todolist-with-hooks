@@ -45,14 +45,14 @@ function App() {
 	)
 
 	return (
-		<div className="App">
-			<AppBar position="static">
+		<div className='App'>
+			<AppBar position='static'>
 				<Toolbar>
-					<IconButton edge="start" color="inherit" aria-label="menu">
+					<IconButton edge='start' color='inherit' aria-label='menu'>
 						<Menu />
 					</IconButton>
-					<Typography variant="h6">News</Typography>
-					<Button color="inherit">Login</Button>
+					<Typography variant='h6'>News</Typography>
+					<Button color='inherit'>Login</Button>
 				</Toolbar>
 			</AppBar>
 			<Container fixed>
@@ -80,14 +80,12 @@ function App() {
 								<Paper style={{ padding: '10px' }}>
 									<Todolist
 										key={tl.id}
-										id={tl.id}
-										title={tl.title}
+										todolist={tl}
 										tasks={tasksForTodolist}
 										removeTask={removeTask}
 										changeFilter={changeFilter}
 										addTask={addTask}
 										changeTaskStatus={changeTaskStatus}
-										filter={tl.filter}
 										removeTodolist={removeTodolist}
 										changeTaskTitle={changeTaskTitle}
 										changeTodolistTitle={changeTodolistTitle}

@@ -2,10 +2,8 @@ import { useState } from 'react'
 import { TasksStateType } from '../App'
 import { todolistId1, todolistId2 } from '../id-utils'
 import { v1 } from 'uuid'
-import {
-	FilterValuesType,
-	TodolistDomainType
-} from '../../../features/TodolistsList/todolists-reducer'
+import { FilterValuesType, TodolistDomainType } from '../../../features/TodolistsList/todolists-reducer'
+import { RequestStatusType } from '../../../App/app-reducer'
 
 export function useTodolists(
 	tasks: TasksStateType,
@@ -18,14 +16,16 @@ export function useTodolists(
 			title: 'What to learn',
 			filter: 'all',
 			addedDate: '',
-			order: 0
+			order: 0,
+			entityStatus: RequestStatusType.IDLE
 		},
 		{
 			id: todolistId2,
 			title: 'What to buy',
 			filter: 'all',
 			addedDate: '',
-			order: 0
+			order: 0,
+			entityStatus: RequestStatusType.IDLE
 		}
 	])
 
@@ -55,7 +55,8 @@ export function useTodolists(
 			title: title,
 			filter: 'all',
 			order: 0,
-			addedDate: ''
+			addedDate: '',
+			entityStatus: RequestStatusType.IDLE
 		}
 		setTodolists([newTodolist, ...todolists])
 		onTodolistAdded(newTodolistId)

@@ -8,6 +8,9 @@ const meta: Meta<typeof App> = {
 	component: App,
 	// This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/react/writing-docs/autodocs
 	tags: ['autodocs'],
+	args: {
+		demo: true
+	},
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 	decorators: [ReduxStoreProviderDecorator]
 }

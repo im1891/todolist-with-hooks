@@ -1,17 +1,9 @@
-import {
-	AddTodolistActionType,
-	RemoveTodolistActionType,
-	SetTodolistsActionType
-} from './todolists-reducer'
-import {
-	TaskPriorities,
-	TaskStatuses,
-	TaskType,
-	TaskUpdateType,
-	todolistsAPI
-} from '../../todolists-api'
-import { AppRootStateType } from '../../App/store'
-import { ThunkAction } from 'redux-thunk'
+import { AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType } from './todolists-reducer'
+import { ResultCodes, TaskPriorities, TaskStatuses, TaskType, TaskUpdateType, todolistsAPI } from '../../todolists-api'
+import { AppReducersThunkType, AppRootStateType } from '../../App/store'
+import { RequestStatusType, SetAppErrorActionType, setAppStatusAC, SetAppStatusActionType } from '../../App/app-reducer'
+import { handleServerAppError, handleServerNetworkError } from '../../utils/error-utils'
+import { AxiosError } from 'axios'
 
 const initialState: TasksStateType = {}
 
@@ -79,7 +71,7 @@ export const tasksReducer = (
 	}
 }
 
-///// actions
+// actions
 export const addTaskAC = (task: TaskType) =>
 	({ type: 'ADD-TASK', payload: { task } } as const)
 
@@ -87,91 +79,105 @@ export const removeTaskAC = (todolistId: string, taskId: string) =>
 	({ type: 'REMOVE-TASK', payload: { todolistId, taskId } } as const)
 
 export const setTasksAC = (todolistId: string, tasks: TaskType[]) =>
-	({
-		type: 'SET-TASKS',
-		payload: {
-			todolistId,
-			tasks
-		}
-	} as const)
+	({ type: 'SET-TASKS', payload: { todolistId, tasks } } as const)
 
-export const updateTaskAC = (
-	todolistId: string,
-	taskId: string,
-	taskUpdateModel: TaskUpdateModelType
-) =>
+export const updateTaskAC = (todolistId: string, taskId: string,
+														 taskUpdateModel: TaskUpdateModelType) =>
 	({
-		type: 'UPDATE-TASK',
-		payload: {
-			todolistId,
-			taskId,
-			taskUpdateModel
-		}
+		type: 'UPDATE-TASK', payload: { todolistId, taskId, taskUpdateModel }
 	} as const)
 
 ///// thunks
-export const fetchTasksTC =
-	(todolistId: string): TasksReducerThunkType =>
+export const fetchTasksTC = (todolistId: string): AppReducersThunkType =>
 	(dispatch) => {
+		dispatch(setAppStatusAC(RequestStatusType.LOADING))
 		todolistsAPI
 			.getTasks(todolistId)
-			.then((tasks) => dispatch(setTasksAC(todolistId, tasks)))
+			.then((tasks) => {
+				dispatch(setTasksAC(todolistId, tasks))
+				dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
+			})
+			.catch((e: AxiosErrorType) => {
+				handleServerNetworkError(e, dispatch)
+			})
 	}
 
 export const deleteTaskTC =
-	(todolistId: string, taskId: string): TasksReducerThunkType =>
-	(dispatch) => {
-		todolistsAPI
-			.deleteTask(todolistId, taskId)
-			.then(
-				(res) =>
-					res.resultCode === 0 && dispatch(removeTaskAC(todolistId, taskId))
-			)
-	}
+	(todolistId: string, taskId: string): AppReducersThunkType =>
+		(dispatch) => {
+			todolistsAPI
+				.deleteTask(todolistId, taskId)
+				.then((data) => {
+					if (data.resultCode === ResultCodes.OK) {
+						dispatch(removeTaskAC(todolistId, taskId))
+					} else {
+						handleServerAppError(data, dispatch)
+					}
+				})
+				.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
+		}
 
 export const addTaskTC =
-	(todolistId: string, title: string): TasksReducerThunkType =>
-	(dispatch) => {
-		todolistsAPI
-			.createTask(todolistId, title)
-			.then((res) => res.resultCode === 0 && dispatch(addTaskAC(res.data.item)))
-	}
+	(todolistId: string, title: string): AppReducersThunkType =>
+		(dispatch) => {
+			dispatch(setAppStatusAC(RequestStatusType.LOADING))
+			todolistsAPI
+				.createTask(todolistId, title)
+				.then((data) => {
+					if (data.resultCode === ResultCodes.OK) {
+						dispatch(addTaskAC(data.data.item))
+						dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
+					} else {
+						handleServerAppError(data, dispatch)
+					}
+				})
+				.catch((e: AxiosErrorType) => {
+					handleServerNetworkError(e, dispatch)
+				})
+		}
 
 export const updateTaskTC =
 	(
 		todolistId: string,
 		taskId: string,
 		taskUpdateModel: TaskUpdateModelType
-	): TasksReducerThunkType =>
-	(dispatch, getState: () => AppRootStateType) => {
-		const task = getState().tasks[todolistId].find((ts) => ts.id === taskId)
+	): AppReducersThunkType =>
+		(dispatch, getState: () => AppRootStateType) => {
+			const task = getState().tasks[todolistId].find((ts) => ts.id === taskId)
 
-		if (!task) {
-			console.warn('task not found in the state')
-			return
+			if (!task) {
+				console.warn('task not found in the state')
+				return
+			}
+
+			const taskApiModel: TaskUpdateType = {
+				status: task.status,
+				title: task.title,
+				startDate: task.startDate,
+				priority: task.priority,
+				deadline: task.deadline,
+				description: task.description,
+				...taskUpdateModel
+			}
+
+			dispatch(setAppStatusAC(RequestStatusType.LOADING))
+			todolistsAPI
+				.updateTask(todolistId, taskId, taskApiModel)
+				.then(
+					(data) => {
+						if (data.resultCode === ResultCodes.OK) {
+							dispatch(updateTaskAC(todolistId, taskId, taskApiModel))
+							dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
+						} else {
+							handleServerAppError(data, dispatch)
+						}
+
+					}
+				)
+				.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
 		}
 
-		const taskApiModel: TaskUpdateType = {
-			status: task.status,
-			title: task.title,
-			startDate: task.startDate,
-			priority: task.priority,
-			deadline: task.deadline,
-			description: task.description,
-			...taskUpdateModel
-		}
-
-		todolistsAPI
-			.updateTask(todolistId, taskId, taskApiModel)
-			.then(
-				(res) =>
-					res.resultCode === 0 &&
-					dispatch(updateTaskAC(todolistId, taskId, taskApiModel))
-			)
-	}
-
-///// types
-
+// types
 export type TasksStateType = {
 	[key: string]: Array<TaskType>
 }
@@ -184,13 +190,8 @@ export type TasksReducerActionTypes =
 	| ReturnType<typeof setTasksAC>
 	| ReturnType<typeof updateTaskAC>
 	| ReturnType<typeof removeTaskAC>
-
-type TasksReducerThunkType = ThunkAction<
-	void,
-	AppRootStateType,
-	unknown,
-	TasksReducerActionTypes
->
+	| SetAppErrorActionType
+	| SetAppStatusActionType
 
 type TaskUpdateModelType = {
 	title?: string
@@ -200,3 +201,5 @@ type TaskUpdateModelType = {
 	startDate?: string
 	deadline?: string
 }
+
+export type AxiosErrorType = AxiosError<{ message: string }>

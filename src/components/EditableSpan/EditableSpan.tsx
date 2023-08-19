@@ -4,9 +4,10 @@ import { TextField } from '@mui/material'
 type EditableSpanPropsType = {
 	value: string
 	onChange: (newValue: string) => void
+	disabled?: boolean
 }
 
-export const EditableSpan = React.memo(function (props: EditableSpanPropsType) {
+export const EditableSpan: React.FC<EditableSpanPropsType> = React.memo((props ) => {
 	let [editMode, setEditMode] = useState(false)
 	let [title, setTitle] = useState(props.value)
 

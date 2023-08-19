@@ -4,7 +4,11 @@ import { Todolist } from './Todolist/Todolist'
 import React from 'react'
 import { useTodolistsList } from './hooks/useTodolistsList'
 
-export const TodolistsList: React.FC = () => {
+type TodolistsListPropsType = {
+	demo?: boolean
+}
+
+export const TodolistsList: React.FC<TodolistsListPropsType> = ({ demo = false }) => {
 	const {
 		todolists,
 		tasks,
@@ -16,7 +20,7 @@ export const TodolistsList: React.FC = () => {
 		changeTaskStatus,
 		changeTaskTitle,
 		addTodolist
-	} = useTodolistsList()
+	} = useTodolistsList(demo)
 
 	return (
 		<>
@@ -29,17 +33,16 @@ export const TodolistsList: React.FC = () => {
 						<Grid item key={tl.id}>
 							<Paper style={{ padding: '10px' }}>
 								<Todolist
-									id={tl.id}
-									title={tl.title}
+									todolist={tl}
 									tasks={tasks[tl.id]}
 									removeTask={removeTask}
 									changeFilter={changeFilter}
 									addTask={addTask}
 									changeTaskStatus={changeTaskStatus}
-									filter={tl.filter}
 									removeTodolist={removeTodolist}
 									changeTaskTitle={changeTaskTitle}
 									changeTodolistTitle={changeTodolistTitle}
+									demo={demo}
 								/>
 							</Paper>
 						</Grid>

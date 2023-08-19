@@ -13,6 +13,9 @@ const meta: Meta<typeof AddItemForm> = {
 	// This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/react/writing-docs/autodocs
 	tags: ['autodocs'],
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
+	args: {
+		addItem: action('clicked')
+	},
 	argTypes: {
 		addItem: {
 			description: 'Button clicked inside form'
@@ -27,16 +30,19 @@ type Story = StoryObj<typeof AddItemForm>
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 export const AddItemFormStory: Story = {
 	// More on args: https://storybook.js.org/docs/react/writing-stories/args
-	args: {
-		addItem: action('clicked')
-	}
 }
 
+export const AddItemFormDisabledStory: Story = {
+	// More on args: https://storybook.js.org/docs/react/writing-stories/args
+	args: {
+		disabled: true
+	}
+}
 const AddItemWithError = (props: AddItemFormPropsType) => {
 	let [title, setTitle] = useState('')
 	let [error, setError] = useState<string | null>('Title is required')
 
-	const addItem = () => {
+	const onAddItemHandler = () => {
 		if (title.trim() !== '') {
 			props.addItem(title)
 			setTitle('')
@@ -53,23 +59,23 @@ const AddItemWithError = (props: AddItemFormPropsType) => {
 		if (error !== null) {
 			setError(null)
 		}
-		if (e.charCode === 13) {
-			addItem()
+		if (e.key === 'Enter') {
+			onAddItemHandler()
 		}
 	}
 
 	return (
 		<div>
 			<TextField
-				variant="outlined"
+				variant='outlined'
 				error={!!error}
 				value={title}
 				onChange={onChangeHandler}
 				onKeyDown={onKeyPressHandler}
-				label="Title"
+				label='Title'
 				helperText={error}
 			/>
-			<IconButton color="primary" onClick={addItem}>
+			<IconButton color='primary' onClick={onAddItemHandler}>
 				<AddBox />
 			</IconButton>
 		</div>
