@@ -1,18 +1,8 @@
-import { useAppDispatch } from '../../../../App/store'
-import { useCallback, useEffect } from 'react'
-import { fetchTasksTC } from '../../tasks-reducer'
+import { useCallback } from 'react'
 import { TaskStatuses } from '../../../../todolists-api'
 import { TodolistPropsType } from '../Todolist'
 
 export const useTodolist = (props: TodolistPropsType, demo: boolean) => {
-	const dispatch = useAppDispatch()
-
-	useEffect(() => {
-		if (demo) {
-			return
-		}
-		dispatch(fetchTasksTC(props.todolist.id))
-	},[])
 
 	const addTask = useCallback(
 		(title: string) => {

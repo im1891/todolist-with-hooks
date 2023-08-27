@@ -8,11 +8,15 @@ import { TaskPriorities, TaskStatuses } from '../todolists-api'
 import { appReducer, RequestStatusType } from '../App/app-reducer'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
+import { authReducer } from '../features/Login/auth-reducer'
+import { ReactNode } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 
 const rootReducer = combineReducers({
-	todolists: todolistsReducer,
 	tasks: tasksReducer,
-	app: appReducer
+	todolists: todolistsReducer,
+	app: appReducer,
+	auth: authReducer
 })
 
 const initialGlobalState: AppRootStateType = {
@@ -91,17 +95,24 @@ const initialGlobalState: AppRootStateType = {
 	},
 	app: {
 		status: RequestStatusType.IDLE,
-		error: null
+		error: null,
+		isInitialized: false
+	},
+	auth: {
+		isLoggedIn: false
 	}
 }
 
 const storyBookStore = createStore(
 	rootReducer, initialGlobalState as AppRootStateType, composeWithDevTools(applyMiddleware(thunk))
 )
-export const ReduxStoreProviderDecorator = (Story: () => JSX.Element) => {
+export const ReduxStoreProviderDecorator = (Story: () => ReactNode) => {
 	return (
-		<Provider store={storyBookStore}>
-			<Story />
-		</Provider>
+
+		<MemoryRouter>
+			<Provider store={storyBookStore}>
+				<Story />
+			</Provider>
+		</MemoryRouter>
 	)
 }

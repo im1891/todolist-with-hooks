@@ -1,9 +1,21 @@
-import { AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType } from './todolists-reducer'
-import { ResultCodes, TaskPriorities, TaskStatuses, TaskType, TaskUpdateType, todolistsAPI } from '../../todolists-api'
+import {
+	AddTodolistActionType,
+	ClearTodolistDataActionType,
+	RemoveTodolistActionType,
+	SetTodolistsActionType
+} from './todolists-reducer'
+import {
+	AxiosErrorType,
+	ResultCodes,
+	TaskPriorities,
+	TaskStatuses,
+	TaskType,
+	TaskUpdateType,
+	todolistsAPI
+} from '../../todolists-api'
 import { AppReducersThunkType, AppRootStateType } from '../../App/store'
 import { RequestStatusType, SetAppErrorActionType, setAppStatusAC, SetAppStatusActionType } from '../../App/app-reducer'
 import { handleServerAppError, handleServerNetworkError } from '../../utils/error-utils'
-import { AxiosError } from 'axios'
 
 const initialState: TasksStateType = {}
 
@@ -12,7 +24,7 @@ export const tasksReducer = (
 	action: TasksReducerActionTypes
 ): TasksStateType => {
 	switch (action.type) {
-		case 'ADD-TASK':
+		case 'TASKS/ADD-TASK':
 			return {
 				...state,
 				[action.payload.task.todoListId]: [
@@ -21,7 +33,7 @@ export const tasksReducer = (
 				]
 			}
 
-		case 'REMOVE-TASK':
+		case 'TASKS/REMOVE-TASK':
 			return {
 				...state,
 				[action.payload.todolistId]: state[action.payload.todolistId].filter(
@@ -29,10 +41,10 @@ export const tasksReducer = (
 				)
 			}
 
-		case 'ADD-TODOLIST':
+		case 'TODOLIST/ADD-TODOLIST':
 			return { ...state, [action.payload.todolist.id]: [] }
 
-		case 'REMOVE-TODOLIST':
+		case 'TODOLIST/REMOVE-TODOLIST':
 			let {
 				[action.payload.id]: [],
 				...restKeys
@@ -40,7 +52,7 @@ export const tasksReducer = (
 
 			return restKeys
 
-		case 'SET-TODOLISTS':
+		case 'TODOLIST/SET-TODOLISTS':
 			return action.payload.todolists.reduce(
 				(acc, td) => {
 					acc[td.id] = []
@@ -49,13 +61,13 @@ export const tasksReducer = (
 				{ ...state }
 			)
 
-		case 'SET-TASKS':
+		case 'TASKS/SET-TASKS':
 			return {
 				...state,
 				[action.payload.todolistId]: action.payload.tasks
 			}
 
-		case 'UPDATE-TASK':
+		case 'TASKS/UPDATE-TASK':
 			return {
 				...state,
 				[action.payload.todolistId]: state[action.payload.todolistId].map(
@@ -66,6 +78,9 @@ export const tasksReducer = (
 				)
 			}
 
+		case 'TODOLIST/CLEAR-TODOLIST-DATA':
+			return {}
+
 		default:
 			return state
 	}
@@ -73,18 +88,18 @@ export const tasksReducer = (
 
 // actions
 export const addTaskAC = (task: TaskType) =>
-	({ type: 'ADD-TASK', payload: { task } } as const)
+	({ type: 'TASKS/ADD-TASK', payload: { task } } as const)
 
 export const removeTaskAC = (todolistId: string, taskId: string) =>
-	({ type: 'REMOVE-TASK', payload: { todolistId, taskId } } as const)
+	({ type: 'TASKS/REMOVE-TASK', payload: { todolistId, taskId } } as const)
 
 export const setTasksAC = (todolistId: string, tasks: TaskType[]) =>
-	({ type: 'SET-TASKS', payload: { todolistId, tasks } } as const)
+	({ type: 'TASKS/SET-TASKS', payload: { todolistId, tasks } } as const)
 
 export const updateTaskAC = (todolistId: string, taskId: string,
 														 taskUpdateModel: TaskUpdateModelType) =>
 	({
-		type: 'UPDATE-TASK', payload: { todolistId, taskId, taskUpdateModel }
+		type: 'TASKS/UPDATE-TASK', payload: { todolistId, taskId, taskUpdateModel }
 	} as const)
 
 ///// thunks
@@ -97,9 +112,7 @@ export const fetchTasksTC = (todolistId: string): AppReducersThunkType =>
 				dispatch(setTasksAC(todolistId, tasks))
 				dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
 			})
-			.catch((e: AxiosErrorType) => {
-				handleServerNetworkError(e, dispatch)
-			})
+			.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
 	}
 
 export const deleteTaskTC =
@@ -110,9 +123,7 @@ export const deleteTaskTC =
 				.then((data) => {
 					if (data.resultCode === ResultCodes.OK) {
 						dispatch(removeTaskAC(todolistId, taskId))
-					} else {
-						handleServerAppError(data, dispatch)
-					}
+					} else handleServerAppError(data, dispatch)
 				})
 				.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
 		}
@@ -127,13 +138,9 @@ export const addTaskTC =
 					if (data.resultCode === ResultCodes.OK) {
 						dispatch(addTaskAC(data.data.item))
 						dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
-					} else {
-						handleServerAppError(data, dispatch)
-					}
+					} else handleServerAppError(data, dispatch)
 				})
-				.catch((e: AxiosErrorType) => {
-					handleServerNetworkError(e, dispatch)
-				})
+				.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
 		}
 
 export const updateTaskTC =
@@ -168,12 +175,8 @@ export const updateTaskTC =
 						if (data.resultCode === ResultCodes.OK) {
 							dispatch(updateTaskAC(todolistId, taskId, taskApiModel))
 							dispatch(setAppStatusAC(RequestStatusType.SUCCEEDED))
-						} else {
-							handleServerAppError(data, dispatch)
-						}
-
-					}
-				)
+						} else handleServerAppError(data, dispatch)
+					})
 				.catch((e: AxiosErrorType) => handleServerNetworkError(e, dispatch))
 		}
 
@@ -192,7 +195,7 @@ export type TasksReducerActionTypes =
 	| ReturnType<typeof removeTaskAC>
 	| SetAppErrorActionType
 	| SetAppStatusActionType
-
+	| ClearTodolistDataActionType
 type TaskUpdateModelType = {
 	title?: string
 	description?: string
@@ -201,5 +204,3 @@ type TaskUpdateModelType = {
 	startDate?: string
 	deadline?: string
 }
-
-export type AxiosErrorType = AxiosError<{ message: string }>

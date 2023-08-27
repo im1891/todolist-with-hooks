@@ -14,11 +14,11 @@ import { TaskStatuses } from '../../../todolists-api'
 export const useTodolistsList = (demo: boolean = false) => {
 	const todolists = useAppSelector((state) => state.todolists)
 	const tasks = useAppSelector((state) => state.tasks)
-
+	const isLoggedIn = useAppSelector(state => state.auth.isLoggedIn)
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
-		if (demo) {
+		if (demo || !isLoggedIn) {
 			return
 		}
 		dispatch(fetchTodolistsTC())
@@ -91,6 +91,7 @@ export const useTodolistsList = (demo: boolean = false) => {
 		removeTodolist,
 		changeTaskTitle,
 		changeTodolistTitle,
-		addTodolist
+		addTodolist,
+		isLoggedIn
 	}
 }

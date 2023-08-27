@@ -10,13 +10,15 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import thunk, { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { appReducer, AppReducerActionsType } from './app-reducer'
+import { authReducer, LoginReducerActionsType } from '../features/Login/auth-reducer'
 
 // объединяя reducer-ы с помощью combineReducers,
 // мы задаём структуру нашего единственного объекта-состояния
 const rootReducer = combineReducers({
 	tasks: tasksReducer,
 	todolists: todolistsReducer,
-	app: appReducer
+	app: appReducer,
+	auth: authReducer
 })
 // непосредственно создаём store
 export const store = createStore(
@@ -34,7 +36,7 @@ export type AppReducersThunkType = ThunkAction<
 	void,
 	AppRootStateType,
 	unknown,
-	TasksReducerActionTypes | TodolistsReducerActionTypes
+	TasksReducerActionTypes | TodolistsReducerActionTypes | LoginReducerActionsType | AppReducerActionsType
 >
 
 export type AppActionTypes = TodolistsReducerActionTypes | TasksReducerActionTypes | AppReducerActionsType

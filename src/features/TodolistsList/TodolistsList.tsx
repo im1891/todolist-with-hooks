@@ -3,6 +3,7 @@ import { AddItemForm } from '../../components/AddItemForm/AddItemForm'
 import { Todolist } from './Todolist/Todolist'
 import React from 'react'
 import { useTodolistsList } from './hooks/useTodolistsList'
+import { Navigate } from 'react-router-dom'
 
 type TodolistsListPropsType = {
 	demo?: boolean
@@ -19,9 +20,11 @@ export const TodolistsList: React.FC<TodolistsListPropsType> = ({ demo = false }
 		changeFilter,
 		changeTaskStatus,
 		changeTaskTitle,
-		addTodolist
+		addTodolist,
+		isLoggedIn
 	} = useTodolistsList(demo)
 
+	if (!isLoggedIn) return <Navigate to={'/login'} />
 	return (
 		<>
 			<Grid container style={{ padding: '20px' }}>

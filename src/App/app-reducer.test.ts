@@ -5,7 +5,8 @@ let startState: AppReducerStateType
 beforeEach(() => {
 	startState = {
 		status: RequestStatusType.IDLE,
-		error: null
+		error: null,
+		isInitialized: false
 	}
 })
 
