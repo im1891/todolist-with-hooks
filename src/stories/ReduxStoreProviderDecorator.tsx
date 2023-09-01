@@ -9,7 +9,6 @@ import { appReducer, RequestStatusType } from '../App/app-reducer'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import { authReducer } from '../features/Login/auth-reducer'
-import { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 
 const rootReducer = combineReducers({
@@ -106,7 +105,7 @@ const initialGlobalState: AppRootStateType = {
 const storyBookStore = createStore(
 	rootReducer, initialGlobalState as AppRootStateType, composeWithDevTools(applyMiddleware(thunk))
 )
-export const ReduxStoreProviderDecorator = (Story: () => ReactNode) => {
+export const ReduxStoreProviderDecorator = (Story: () => JSX.Element) => {
 	return (
 
 		<MemoryRouter>
